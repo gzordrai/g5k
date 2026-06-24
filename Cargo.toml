@@ -1,0 +1,10 @@
+[package]
+name = "g5k"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+reqwest = { version = "0.13.4", features = ["json"] }
+serde = { version = "1.0.228", features = ["derive"] }
+thiserror = "2.0.18"
+tokio = { version = "1.52.3", features = ["rt", "macros", "rt-multi-thread"] }
