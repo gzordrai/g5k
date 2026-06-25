@@ -4,6 +4,60 @@ use serde::{Serialize, de::DeserializeOwned};
 
 use crate::error::{G5KError, Result};
 
+macro_rules! endpoint {
+    (
+        $method:ident, $name:ident, $path:literal, ($($parg:ident : $pty:ty),*), Location
+    ) => {
+        pub async fn $name(&self, $($parg: $pty,)*) -> Result<String> {
+            self.request_location(Method::$method, format!($path), None::<&()>, None::<&()>).await
+        }
+    };
+
+    (
+        $method:ident, $name:ident, $path:literal, ($($parg:ident : $pty:ty),*), body: $bty:ty, Location
+    ) => {
+        pub async fn $name(&self, $($parg: $pty,)* body: &$bty) -> Result<String> {
+            self.request_location(Method::$method, format!($path), None::<&()>, Some(body)).await
+        }
+    };
+
+    (
+        $method:ident, $name:ident, $path:literal, ($($parg:ident : $pty:ty),*), $ret:ty
+    ) => {
+        pub async fn $name(&self, $($parg: $pty,)*) -> Result<$ret> {
+            let path = format!($path);
+            self.request(Method::$method, &path, None::<&()>, None::<&()>).await
+        }
+    };
+
+    (
+        $method:ident, $name:ident, $path:literal, ($($parg:ident : $pty:ty),*), query: $qty:ty, $ret:ty
+    ) => {
+        pub async fn $name(&self, $($parg: $pty,)* query: &$qty) -> Result<$ret> {
+            let path = format!($path);
+            self.request(Method::$method, &path, Some(query), None::<&()>).await
+        }
+    };
+
+    (
+        $method:ident, $name:ident, $path:literal, ($($parg:ident : $pty:ty),*), body: $bty:ty, $ret:ty
+    ) => {
+        pub async fn $name(&self, $($parg: $pty,)* body: &$bty) -> Result<$ret> {
+            let path = format!($path);
+            self.request(Method::$method, &path, None::<&()>, Some(body)).await
+        }
+    };
+
+    (
+        $method:ident, $name:ident, $path:literal, ($($parg:ident : $pty:ty),*), query: $qty:ty, body: $bty:ty, $ret:ty
+    ) => {
+        pub async fn $name(&self, $($parg: $pty,)* query: &$qty, body: &$bty) -> Result<$ret> {
+            let path = format!($path);
+            self.request(Method::$method, &path, Some(query), Some(body)).await
+        }
+    };
+}
+
 pub struct G5KClient {
     http: Client,
     username: SecretString,
