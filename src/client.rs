@@ -2,7 +2,15 @@ use reqwest::{Client, Method, Response, header::LOCATION};
 use secrecy::{ExposeSecret, SecretString};
 use serde::{Serialize, de::DeserializeOwned};
 
-use crate::error::{G5KError, Result};
+use crate::{
+    Site,
+    error::{G5KError, Result},
+};
+#[cfg(feature = "jobs")]
+use crate::{
+    job::{Jobs, WalltimeChange, WalltimeChangeRequest},
+    model::job::{Job, JobsQuery, JobPayload},
+};
 
 macro_rules! endpoint {
     (
@@ -156,4 +164,14 @@ impl G5KClient {
             .map(|s| s.to_string())
             .map_err(|_| G5KError::InvalidLocation)
     }
+}
+
+#[cfg(feature = "jobs")]
+impl G5KClient {
+    endpoint!(GET, list_jobs, "/sites/{site}/jobs", (site: Site), query: JobsQuery, Jobs);
+    endpoint!(POST, submit_job, "/sites/{site}/jobs", (site: Site), body: JobPayload<'_>, Location);
+    endpoint!(GET, get_job, "/sites/{site}/jobs/{id}", (site: Site, id: u64), Job);
+    endpoint!(DELETE, delete_job, "/sites/{site}/jobs/{id}", (site: Site, id: u64), Location);
+    endpoint!(GET, get_walltime, "/sites/{site}/jobs/{id}/walltime", (site: Site, id: u64), WalltimeChange);
+    endpoint!(POST, submit_walltime, "/sites/{site}/jobs/{id}/walltime", (site: Site, id: u64), body: WalltimeChangeRequest<'_>, Location);
 }
