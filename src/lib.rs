@@ -1,5 +1,5 @@
 mod client;
-mod error;
+pub mod error;
 mod model;
 mod site;
 
