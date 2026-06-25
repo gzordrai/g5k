@@ -2,6 +2,7 @@
 name = "g5k"
 version = "0.1.0"
 edition = "2024"
+description = "Grid'5000 API client"
 license = "Apache-2.0"
 
 [dependencies]
